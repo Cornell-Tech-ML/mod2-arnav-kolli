@@ -582,7 +582,7 @@ class Tensor:
             divisor = self.shape[dim]
         return sum_result / divisor
 
-    def permute(self, *order: UserShape) -> Tensor:
+    def permute(self, *order: int) -> Tensor:
         """Permute the dimensions of the tensor.
 
         Args:
