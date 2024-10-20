@@ -4,6 +4,13 @@ Be sure you have minitorch installed in you Virtual Env.
 """
 
 import minitorch
+from minitorch.tensor_functions import (
+    View,
+    tensor,
+    Mul,
+    Sum,
+    Add
+)
 
 # Use this function to make a random parameter in
 # your module.
@@ -12,6 +19,47 @@ def RParam(*shape):
     return minitorch.Parameter(r)
 
 # TODO: Implement for Task 2.5.
+class Network(minitorch.Module):
+    def __init__(self, hidden_layers):
+        super().__init__()
+        self.layer1 = Linear(2, hidden_layers)
+        self.layer2 = Linear(hidden_layers, hidden_layers)
+        self.layer3 = Linear(hidden_layers, 1)
+
+    def forward(self, x):
+        x = self.layer1.forward(x)
+        x = x.relu()
+        x = self.layer2.forward(x)
+        x = x.relu()
+        x =  self.layer3.forward(x)
+        return x.sigmoid()
+
+class Linear(minitorch.Module):
+    def __init__(self, in_size, out_size):
+        super().__init__()
+        self.weights = RParam(in_size, out_size)
+        self.bias = RParam(out_size)
+
+    def forward(self, x):
+        x_reshaped = View.apply(x, tensor([x.shape[0], x.shape[1]]))
+
+        x_reshaped = View.apply(x, tensor([x_reshaped.shape[0], x_reshaped.shape[1], 1]))
+
+        # Reshape weight to (1, in_size, out_size)
+        weight_reshaped = View.apply(self.weights.value, tensor([1, self.weights.value.shape[0], self.weights.value.shape[1]]))
+
+        # Element-wise multiplication
+        prod = Mul.apply(x_reshaped, weight_reshaped)
+
+        # Sum along the in_size dimension
+        result = Sum.apply(prod, tensor([1]))
+
+        # Add bias
+        result = Add.apply(result, self.bias.value)
+        result = View.apply(result, tensor([x_reshaped.shape[0], self.weights.value.shape[1]]))
+
+        return result
+
 
 def default_log_fn(epoch, total_loss, correct, losses):
     print("Epoch ", epoch, " loss ", total_loss, "correct", correct)

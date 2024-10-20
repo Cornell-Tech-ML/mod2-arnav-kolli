@@ -65,7 +65,7 @@ def test_permute(data: DataObject, t1: Tensor) -> None:
     permutation = data.draw(permutations(range(len(t1.shape))))
 
     def permute(a: Tensor) -> Tensor:
-        return a.permute(*permutation)
+        return a.permute([*permutation])
 
     grad_check(permute, t1)
 
@@ -163,7 +163,7 @@ def test_back_view(t1: Tensor) -> None:
 def test_permute_view() -> None:
     t = tensor([[2, 3, 4], [4, 5, 7]])
     assert t.shape == (2, 3)
-    t2 = t.permute(1, 0)
+    t2 = t.permute([1, 0])
     t2.view(6)
 
 
